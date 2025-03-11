@@ -101,7 +101,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## Preview
 
-You can view the live demo here: [Vercel Deployment Link](https://your-vercel-link.vercel.app)
+You can view the live demo here: [Vercel Deployment Link]([https://your-vercel-link.vercel.app](https://push-notification-pied.vercel.app/)
 
 ---
 
