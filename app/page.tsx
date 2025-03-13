@@ -81,7 +81,7 @@ export default function Home() {
         </motion.h1>
 
         {/* Notification Bell with Red Dot & Smooth Shake */}
-        <div className="relative w-full max-w-[300px] sm:max-w-[320px] aspect-square mb-14 sm:mb-18">
+        <div className="relative w-full max-w-[300px] sm:max-w-[420px] aspect-square mb-24">
           <Ripple showNotification={showNotification} />
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <motion.div
@@ -92,7 +92,7 @@ export default function Home() {
                 transition: { duration: 0.5 }
               } : {}}
             >
-              <Bell className="w-16 h-16 sm:w-18 sm:h-18 text-white border-blue-500" />
+              <Bell className="w-20 h-20 sm:w-18 sm:h-18 text-white border-blue-500" />
               <AnimatePresence>
                 {showNotification && (
                   <motion.div
@@ -111,12 +111,12 @@ export default function Home() {
 
         <motion.div
           key="text-section"
-          className="text-center mb-12 sm:mb-0"
+          className="text-center mb-10 sm:mb-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <h2 className="text-2xl sm:text-[22px] font-bold mb-2.5">Lorem ipsum...</h2>
+          <h2 className="text-2xl sm:text-[22px] font-bold mb-3">Lorem ipsum...</h2>
           <p className="text-sm sm:text-[16px] text-gray-400 mb-0 sm:mb-10">Lorem ipsum dolor sit amet.</p>
         </motion.div>
 
@@ -130,7 +130,7 @@ export default function Home() {
           <div className="flex justify-center items-center w-full mb-4">
             <Button
               onClick={handleNotification}
-              className="px-20 py-3 sm:px-20 sm:py-3 sm:text-sm text-white bg-[#1A0B33] border-2 border-[#6434ce] rounded-xl transition-all duration-300 hover:bg-[#2A1055] hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#6A35FF]"
+              className="px-24 py-6 sm:px-24 sm:py-6 sm:text-lg text-white bg-[#1A0B33] border-2 border-[#6434ce] rounded-xl transition-all duration-300 hover:bg-[#2A1055] hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#6A35FF]"
             >
               Send Notification
             </Button>
@@ -152,8 +152,8 @@ export default function Home() {
             <Bell className="w-4 h-4 text-yellow-400" />
             <span className="font-semibold">{currentNotification.title}</span>
             <span className="text-gray-300">{truncateText(currentNotification.body, 10)}</span>
-            <button 
-              onClick={() => setShowNotification(false)} 
+            <button
+              onClick={() => setShowNotification(false)}
               className="text-white hover:text-gray-300 ml-2"
             >
               <X className="w-4 h-4" />
@@ -171,11 +171,14 @@ export default function Home() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -50, opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="fixed top-0 left-1/2 -translate-x-1/2 bg-[#6A35FF] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-b-xl shadow-lg flex items-center gap-2 sm:gap-3 text-xs sm:text-sm"
+            className="fixed top-2 sm:top-4 left-1/8 -translate-x-1/2 bg-[#3e305c] hover:bg-[#372a54]  text-white px-4 py-4 sm:px-6 sm:py-4 rounded-xl shadow-lg flex items-center gap-2 sm:gap-3 text-xs sm:text-sm"
           >
-            <Download className="w-4 h-4" />
-            <span>Install Push Notification PWA</span>
-            <button onClick={handleInstallPWA} className="underline">Install</button>
+            <span>Install Push Notification App</span>
+            <button onClick={handleInstallPWA} className="flex items-center gap-2 underline">
+              <Download className="w-4 h-4" />
+              <span>Install</span>
+            </button>
+
           </motion.div>
         )}
       </AnimatePresence>
