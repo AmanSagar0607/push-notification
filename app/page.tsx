@@ -1,28 +1,60 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell } from 'lucide-react';
+import { Bell, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { Ripple } from '@/components/Ripple';
 
 const NOTIFICATION_MESSAGES = [
-  { title: "New Likes", body: "You have 8 new likes on your recent post!" },
-  { title: "WhatsApp", body: "You received a new message on WhatsApp" },
-  { title: "Instagram", body: "Someone tagged you in a photo" },
-  { title: "Twitter", body: "Your tweet got 12 retweets!" },
-  { title: "Email", body: "You have 3 unread emails in your inbox" },
-  { title: "LinkedIn", body: "5 people viewed your profile today" },
-  { title: "YouTube", body: "A channel you subscribe to posted a new video" },
-  { title: "Facebook", body: "You have a new friend request" },
-  { title: "Reminder", body: "Don't forget your meeting at 3 PM" },
-  { title: "Weather Alert", body: "It's going to rain in your area today" }
+  { title: "Likes", body: "8 new likes!" },
+  { title: "WhatsApp", body: "New message!" },
+  { title: "Instagram", body: "You got tagged!" },
+  { title: "Twitter", body: "12 retweets!" },
+  { title: "Email", body: "3 unread mails!" },
+  { title: "LinkedIn", body: "5 profile views!" },
+  { title: "YouTube", body: "New video!" },
+  { title: "Facebook", body: "New request!" },
+  { title: "Reminder", body: "Meeting at 3 PM!" },
+  { title: "Weather", body: "Rain expected!" }
 ];
 
 export default function Home() {
   const [showNotification, setShowNotification] = useState(false);
-  const { toast } = useToast();
+  const [currentNotification, setCurrentNotification] = useState<{ title: string; body: string } | null>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+
+  // ✅ Capture `beforeinstallprompt` event and store it
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault(); // Prevent default browser prompt
+      setInstallPromptEvent(event); // Store the event for later use
+      setShowInstallPrompt(true); // Show the install banner
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  // ✅ Function to manually trigger PWA install
+  const handleInstallPWA = () => {
+    if (installPromptEvent) {
+      installPromptEvent.prompt(); // Show native install prompt
+      installPromptEvent.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('PWA installed');
+        }
+        setShowInstallPrompt(false); // Hide banner after user choice
+        setInstallPromptEvent(null);
+      });
+    }
+  };
+
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  };
 
   const getRandomNotification = () => {
     return NOTIFICATION_MESSAGES[Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)];
@@ -30,92 +62,123 @@ export default function Home() {
 
   const handleNotification = () => {
     const notification = getRandomNotification();
-    
+    setCurrentNotification(notification);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 2000);
-
-    toast({
-      title: notification.title,
-      description: notification.body,
-      className: "bg-[#2A1C45] border-[#4A3870]",
-    });
-
-    if ("Notification" in window) {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          new Notification(notification.title, {
-            body: notification.body,
-            icon: "/notification-icon.png"
-          });
-        }
-      });
-    }
+    setTimeout(() => setShowNotification(false), 5000); // Hide after 5 sec
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#1E1333] to-[#0A0515] text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen flex flex-col items-center justify-center">
-        <AnimatePresence>
-          <motion.h1 
-            className="text-3xl sm:text-4xl font-bold mb-4"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Hola!
-          </motion.h1>
+    <main className="min-h-screen flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#2C2143] to-[#000000] text-white overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center justify-center min-h-[100vh]">
+        <motion.h1
+          key="title"
+          className="text-lg sm:text-lg mb-8 sm:mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Hola!
+        </motion.h1>
 
-          <div className="relative w-full max-w-[300px] sm:max-w-[400px] aspect-square mb-12 sm:mb-24">
-            <Ripple showNotification={showNotification} />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <motion.div
-                className="relative"
-                animate={showNotification ? {
-                  rotate: [0, -15, 15, -10, 10, 0],
-                  scale: [1, 1.1, 1],
-                  transition: { duration: 0.5 }
-                } : {}}
-              >
-                <Bell className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
-                <AnimatePresence>
-                  {showNotification && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full"
-                    />
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
+        {/* Notification Bell with Red Dot & Smooth Shake */}
+        <div className="relative w-full max-w-[300px] sm:max-w-[320px] aspect-square mb-14 sm:mb-18">
+          <Ripple showNotification={showNotification} />
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <motion.div
+              className="relative"
+              animate={showNotification ? {
+                rotate: [0, -5, 5, -3, 3, 0],
+                scale: [1, 1.1, 1],
+                transition: { duration: 0.5 }
+              } : {}}
+            >
+              <Bell className="w-16 h-16 sm:w-18 sm:h-18 text-white border-blue-500" />
+              <AnimatePresence>
+                {showNotification && (
+                  <motion.div
+                    key="notification-indicator"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full"
+                  />
+                )}
+              </AnimatePresence>
+            </motion.div>
           </div>
+        </div>
 
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Lorem Ipsum...</h2>
-            <p className="text-lg sm:text-xl text-gray-400">Lorem ipsum dolor sit amet.</p>
-          </motion.div>
+        <motion.div
+          key="text-section"
+          className="text-center mb-12 sm:mb-0"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h2 className="text-2xl sm:text-[22px] font-bold mb-2.5">Lorem ipsum...</h2>
+          <p className="text-sm sm:text-[16px] text-gray-400 mb-0 sm:mb-10">Lorem ipsum dolor sit amet.</p>
+        </motion.div>
 
-          <motion.div
-            className="w-full max-w-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
+        <motion.div
+          key="button-section"
+          className="w-full max-w-md flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <div className="flex justify-center items-center w-full mb-4">
             <Button
               onClick={handleNotification}
-              className="w-full py-4 sm:py-6 text-base sm:text-lg bg-transparent hover:bg-[#3A2A5A] border-2 border-[#4A3870] rounded-lg transition-all duration-300 hover:scale-[1.02]"
+              className="px-20 py-3 sm:px-20 sm:py-3 sm:text-sm text-white bg-[#1A0B33] border-2 border-[#6434ce] rounded-xl transition-all duration-300 hover:bg-[#2A1055] hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#6A35FF]"
             >
               Send Notification
             </Button>
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
+
+      {/* 🔔 Notification Toast (Top-Left) - Responsive */}
+      <AnimatePresence>
+        {showNotification && currentNotification && (
+          <motion.div
+            key="notification-toast"
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -50, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed top-6 left-4 sm:left-6 bg-[#2A1C45] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm sm:text-base max-w-[90vw] sm:max-w-[320px] md:max-w-[400px]"
+          >
+            <Bell className="w-4 h-4 text-yellow-400" />
+            <span className="font-semibold">{currentNotification.title}</span>
+            <span className="text-gray-300">{truncateText(currentNotification.body, 10)}</span>
+            <button 
+              onClick={() => setShowNotification(false)} 
+              className="text-white hover:text-gray-300 ml-2"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 📢 PWA Install Banner - Responsive */}
+      <AnimatePresence>
+        {showInstallPrompt && (
+          <motion.div
+            key="install-prompt"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed top-0 left-1/2 -translate-x-1/2 bg-[#6A35FF] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-b-xl shadow-lg flex items-center gap-2 sm:gap-3 text-xs sm:text-sm"
+          >
+            <Download className="w-4 h-4" />
+            <span>Install Push Notification PWA</span>
+            <button onClick={handleInstallPWA} className="underline">Install</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
