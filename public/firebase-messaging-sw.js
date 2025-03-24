@@ -1,12 +1,12 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.2/firebase-messaging-compat.js');
 
-// Hardcode environment variables (these are injected during build)
+// Initialize Firebase
 const firebaseConfig = {
   apiKey: 'AIzaSyDM4nJvQzpC9v77B4Gllbv9-zbZAT1Yg0c',
   authDomain: 'push-notification-1edfe.firebaseapp.com',
   projectId: 'push-notification-1edfe',
-  storageBucket: 'push-notification-1edfe.appspot.com',
+  storageBucket: 'push-notification-1edfe.firebasestorage.app',
   messagingSenderId: '972940484587',
   appId: '1:972940484587:web:b677ea6e83e04580c183ae',
   measurementId: 'G-K54W145Z1F'
@@ -31,7 +31,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle Notification Click
+// Handle notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const actionUrl = event.notification?.data?.click_action;
@@ -40,7 +40,6 @@ self.addEventListener('notificationclick', (event) => {
   }
 });
 
-// Handle Notification Close
 self.addEventListener('notificationclose', (event) => {
   console.log('Notification closed:', event);
 });
