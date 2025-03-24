@@ -35,7 +35,7 @@ yarn-error.log*
 next-env.d.ts
 
 
-firebase-admin.js
+# firebase-admin.js
 firebase-service-account.json
 firebase-messaging-sw.js
 
