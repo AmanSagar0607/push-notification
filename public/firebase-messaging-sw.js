@@ -1,12 +1,12 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.2/firebase-messaging-compat.js');
 
-// Ensure Environment Variables are Replaced with Actual Values
+// Hardcode environment variables (these are injected during build)
 const firebaseConfig = {
-  apiKey: 'AIzaSyDM4N......',
+  apiKey: 'AIzaSyDM4nJvQzpC9v77B4Gllbv9-zbZAT1Yg0c',
   authDomain: 'push-notification-1edfe.firebaseapp.com',
   projectId: 'push-notification-1edfe',
-  storageBucket: 'push-notification-1edfe.firebasestorage.app',
+  storageBucket: 'push-notification-1edfe.appspot.com',
   messagingSenderId: '972940484587',
   appId: '1:972940484587:web:b677ea6e83e04580c183ae',
   measurementId: 'G-K54W145Z1F'
@@ -14,12 +14,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+
+// Initialize Firebase Cloud Messaging
 const messaging = firebase.messaging();
 
-// Handle Background Notifications
+// Handle Background Notification
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message:', payload);
-
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
   const notificationTitle = payload.notification?.title || 'Notification';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new message!',
@@ -33,11 +34,13 @@ messaging.onBackgroundMessage((payload) => {
 // Handle Notification Click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const clickAction = event.notification?.data?.click_action || '/';
-  event.waitUntil(clients.openWindow(clickAction));
+  const actionUrl = event.notification?.data?.click_action;
+  if (actionUrl) {
+    event.waitUntil(clients.openWindow(actionUrl));
+  }
 });
 
 // Handle Notification Close
 self.addEventListener('notificationclose', (event) => {
-  console.log('Notification was closed:', event);
+  console.log('Notification closed:', event);
 });
