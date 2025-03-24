@@ -1,6 +1,6 @@
 {
   "name": "Push Notification",
-  "short_name": "PushNotify",
+  "short_name": "Push-notification",
   "description": "A PWA for sending and receiving push notifications.",
   "theme_color": "#2c2143",
   "background_color": "#2c2143",
