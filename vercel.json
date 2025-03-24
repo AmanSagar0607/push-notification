@@ -20,8 +20,7 @@
     ],
     "functions": {
       "api/send-notification/route.ts": {
-        "runtime": "nodejs",
-        "handler": "api/send-notification/route"
+        "runtime": "nodejs"
       }
     }
-  }
+}
