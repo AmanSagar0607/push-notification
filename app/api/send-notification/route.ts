@@ -17,24 +17,19 @@ export async function POST(request: Request) {
       notification: {
         title,
         body,
-        image
+        image,
       },
       data: {
         click_action: '/',
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
 
     await admin.messaging().send(message);
 
-    return NextResponse.json(
-      { message: 'Notification sent successfully' }
-    );
+    return NextResponse.json({ message: 'Notification sent successfully' });
   } catch (error) {
     console.error('Error sending notification:', error);
-    return NextResponse.json(
-      { error: 'Failed to send notification' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 });
   }
 }
