@@ -44,6 +44,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Origin": window.location.origin,
         },
         body: JSON.stringify({
           token: token,
