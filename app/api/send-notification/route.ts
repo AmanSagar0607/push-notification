@@ -3,8 +3,10 @@ import { Message } from "firebase-admin/messaging";
 import { NextRequest, NextResponse } from "next/server";
 
 // Initialize Firebase Admin SDK using environment variables
+let firebaseInitialized = false;
+
 const initializeFirebase = () => {
-  if (!admin.apps.length) {
+  if (!firebaseInitialized) {
     try {
       const serviceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
@@ -15,6 +17,7 @@ const initializeFirebase = () => {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
+      firebaseInitialized = true;
     } catch (error) {
       console.error("Firebase initialization error:", error);
       throw new Error("Failed to initialize Firebase");
@@ -22,10 +25,10 @@ const initializeFirebase = () => {
   }
 };
 
-initializeFirebase();
-
 export async function POST(request: NextRequest) {
   try {
+    initializeFirebase();
+    
     const { token, title, message, link } = await request.json();
 
     if (!token) {
