@@ -1,46 +1,80 @@
+// hooks/useInstallPrompt.tsx
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useEffect, useState } from "react";
 
 export function useInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const promptInstall = () => {
-    if (!deferredPrompt) {
-      return;
-    }
-    // Show the install prompt
-    deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
-    deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-      // Clear the saved prompt since it can't be used again
-      setDeferredPrompt(null);
-      setIsInstallable(false);
-    });
+  // Check if the PWA is installable
+  const isPWAInstallable = () => {
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone ||
+      document.referrer.includes('android-app://')
+    );
   };
 
-  return { isInstallable, promptInstall };
+  // Capture beforeinstallprompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      setShowInstallPrompt(true);
+      localStorage.setItem('installPromptEvent', 'true');
+    };
+
+    if (!isPWAInstallable()) {
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }
+
+    const shouldShowPrompt = localStorage.getItem('installPromptEvent');
+    if (shouldShowPrompt && !isPWAInstallable()) {
+      setShowInstallPrompt(true);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  // Function to manually trigger PWA install
+  const handleInstallPWA = () => {
+    if (installPromptEvent) {
+      installPromptEvent.prompt();
+
+      const hideTimeout = setTimeout(() => {
+        setShowInstallPrompt(false);
+        setInstallPromptEvent(null);
+        localStorage.removeItem('installPromptEvent');
+      }, 5000);
+
+      installPromptEvent.userChoice.then((choiceResult: any) => {
+        clearTimeout(hideTimeout);
+
+        if (choiceResult.outcome === 'accepted') {
+          console.log('PWA installed');
+        }
+        setShowInstallPrompt(false);
+        setInstallPromptEvent(null);
+        localStorage.removeItem('installPromptEvent');
+      });
+    }
+  };
+
+  // Auto-dismiss banner
+  useEffect(() => {
+    if (showInstallPrompt) {
+      const timeout = setTimeout(() => {
+        setShowInstallPrompt(false);
+        localStorage.removeItem('installPromptEvent');
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showInstallPrompt]);
+
+  return {
+    showInstallPrompt,
+    handleInstallPWA,
+    setShowInstallPrompt // Add this line
+  };
 }
