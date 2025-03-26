@@ -42,3 +42,5 @@ firebase-messaging-sw.js
 
 .env
 .env.local
+
+service-account.json
