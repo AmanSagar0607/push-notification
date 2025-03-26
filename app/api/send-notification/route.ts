@@ -60,5 +60,21 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({ success: false, error: "Method not allowed" }, { status: 405 });
+  return NextResponse.json(
+    { success: false, error: "Method not allowed" },
+    { status: 405 }
+  );
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return NextResponse.json(
+    { success: true },
+    {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    }
+  );
 }
