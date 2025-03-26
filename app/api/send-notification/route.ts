@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Initialize Firebase Admin SDK using environment variables
 if (!admin.apps.length) {
   const serviceAccount = {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    projectId: process.env.FIREBASE_PROJECT_ID,
     privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, '\n'),
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   };
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { token, title, message, link } = await request.json();
 
     if (!token) {
-      return NextResponse.json({ success: false, error: "Token is required" });
+      return NextResponse.json({ success: false, error: "Token is required" }, { status: 400 });
     }
 
     const payload: Message = {
@@ -29,21 +29,18 @@ export async function POST(request: NextRequest) {
         title,
         body: message,
       },
-      webpush: link
-        ? {
-            fcmOptions: {
-              link,
-            },
-          }
-        : undefined,
+      data: {
+        link,
+      },
     };
 
-    await admin.messaging().send(payload);
-
-    return NextResponse.json({ success: true, message: "Notification sent!" });
+    const response = await admin.messaging().send(payload);
+    return NextResponse.json({ success: true, messageId: response });
   } catch (error) {
-    console.error("Notification Error:", error);
-    const errorMessage = (error as Error).message || "An unknown error occurred";
-    return NextResponse.json({ success: false, error: errorMessage });
+    console.error("Error sending notification:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to send notification" },
+      { status: 500 }
+    );
   }
 }

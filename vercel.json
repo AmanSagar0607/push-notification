@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/api/send-notification",
-      "destination": "/app/api/send-notification/route"
+      "source": "/api/(.*)",
+      "destination": "/app/api/$1"
     }
-  ]
+  ],
+  "api": {
+    "bodySizeLimit": "1mb",
+    "responseLimit": "10mb"
+  }
 }

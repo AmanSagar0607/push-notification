@@ -54,11 +54,13 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send notification");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send notification");
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log("Notification sent successfully!", data);
+
     } catch (error) {
       console.error("Error sending notification:", error);
       setCurrentNotification({
