@@ -52,7 +52,7 @@ export default function Home() {
           link: "/contact",
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to send notification");
       }

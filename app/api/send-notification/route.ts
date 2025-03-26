@@ -9,7 +9,6 @@ if (!admin.apps.length) {
     privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, '\n'),
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   };
-  
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: "Notification sent!" });
   } catch (error) {
     console.error("Notification Error:", error);
-    
     const errorMessage = (error as Error).message || "An unknown error occurred";
     return NextResponse.json({ success: false, error: errorMessage });
   }
