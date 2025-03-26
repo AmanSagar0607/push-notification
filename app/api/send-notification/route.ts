@@ -3,17 +3,26 @@ import { Message } from "firebase-admin/messaging";
 import { NextRequest, NextResponse } from "next/server";
 
 // Initialize Firebase Admin SDK using environment variables
-if (!admin.apps.length) {
-  const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  };
+const initializeFirebase = () => {
+  if (!admin.apps.length) {
+    try {
+      const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, '\n'),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      };
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      throw new Error("Failed to initialize Firebase");
+    }
+  }
+};
+
+initializeFirebase();
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +30,10 @@ export async function POST(request: NextRequest) {
 
     if (!token) {
       return NextResponse.json({ success: false, error: "Token is required" }, { status: 400 });
+    }
+
+    if (!title || !message) {
+      return NextResponse.json({ success: false, error: "Title and message are required" }, { status: 400 });
     }
 
     const payload: Message = {
@@ -38,9 +51,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, messageId: response });
   } catch (error) {
     console.error("Error sending notification:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return NextResponse.json(
-      { success: false, error: "Failed to send notification" },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
+}
+
+export async function GET(request: NextRequest) {
+  return NextResponse.json({ success: false, error: "Method not allowed" }, { status: 405 });
 }
