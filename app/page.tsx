@@ -40,7 +40,7 @@ export default function Home() {
       setCurrentNotification(notification);
       setShowNotification(true);
 
-      const response = await fetch("/send-notification", {
+      const response = await fetch("/api/send-notification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export default function Home() {
           link: "/contact",
         }),
       });
-
+      
       if (!response.ok) {
         throw new Error("Failed to send notification");
       }
